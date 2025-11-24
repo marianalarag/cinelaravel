@@ -4,16 +4,15 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
-
     public function index()
     {
-        $users = User::with('roles')->get();
+        $users = User::with('roles')->latest()->get();
         return view('admin.users.index', compact('users'));
     }
 
@@ -30,8 +29,8 @@ class UserController extends Controller
             'email' => 'required|email|unique:users,email',
             'phone' => 'nullable|string|max:20',
             'birth_date' => 'nullable|date',
-            'password' => 'required|min:8|confirmed',
-            'role' => 'required|exists:roles,id'
+            'password' => 'required|string|min:8|confirmed',
+            'role' => 'required|exists:roles,id',
         ]);
 
         $user = User::create([
@@ -40,13 +39,18 @@ class UserController extends Controller
             'phone' => $request->phone,
             'birth_date' => $request->birth_date,
             'password' => Hash::make($request->password),
+            'is_active' => true,
         ]);
 
-        $role = Role::findById($request->role);
-        $user->assignRole($role);
+        $user->roles()->attach($request->role);
 
         return redirect()->route('admin.users.index')
             ->with('success', 'Usuario creado correctamente.');
+    }
+
+    public function show(User $user)
+    {
+        return view('admin.users.show', compact('user'));
     }
 
     public function edit(User $user)
@@ -62,8 +66,9 @@ class UserController extends Controller
             'email' => 'required|email|unique:users,email,' . $user->id,
             'phone' => 'nullable|string|max:20',
             'birth_date' => 'nullable|date',
-            'password' => 'nullable|min:8|confirmed',
-            'role' => 'required|exists:roles,id'
+            'password' => 'nullable|string|min:8|confirmed',
+            'role' => 'required|exists:roles,id',
+            'is_active' => 'boolean',
         ]);
 
         $data = [
@@ -71,17 +76,15 @@ class UserController extends Controller
             'email' => $request->email,
             'phone' => $request->phone,
             'birth_date' => $request->birth_date,
-            'is_active' => $request->has('is_active'), // ← AGREGAR ESTA LÍNEA
+            'is_active' => $request->has('is_active'),
         ];
 
-        if ($request->filled('password')) {
+        if ($request->password) {
             $data['password'] = Hash::make($request->password);
         }
 
         $user->update($data);
-
-        $role = Role::findById($request->role);
-        $user->syncRoles([$role]);
+        $user->roles()->sync([$request->role]);
 
         return redirect()->route('admin.users.index')
             ->with('success', 'Usuario actualizado correctamente.');
@@ -89,14 +92,19 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
-        if ($user->id === 1) {
-            return redirect()->route('admin.users.index')
-                ->with('error', 'No puedes eliminar al usuario administrador principal.');
-        }
-
+        // Soft delete o desactivar en lugar de eliminar completamente
         $user->update(['is_active' => false]);
 
         return redirect()->route('admin.users.index')
             ->with('success', 'Usuario desactivado correctamente.');
+    }
+
+    public function toggleStatus(User $user)
+    {
+        $user->update(['is_active' => !$user->is_active]);
+
+        $status = $user->is_active ? 'activado' : 'desactivado';
+        return redirect()->route('admin.users.index')
+            ->with('success', "Usuario {$status} correctamente.");
     }
 }
