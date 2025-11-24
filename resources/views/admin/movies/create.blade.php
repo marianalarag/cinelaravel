@@ -48,12 +48,27 @@
                 <!-- Género -->
                 <div>
                     <label for="genre" class="block text-sm font-medium text-gray-700">Género</label>
-                    <input type="text" name="genre" id="genre" required
-                           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                           value="{{ old('genre') }}">
+                    <select name="genre" id="genre" required
+                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">Seleccionar género</option>
+                        @foreach($genres as $genre)
+                            <option value="{{ $genre->name }}" {{ old('genre') == $genre->name ? 'selected' : '' }}>
+                                {{ $genre->name }}
+                            </option>
+                        @endforeach
+                    </select>
                     @error('genre')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
+                </div>
+
+                <!-- Estado -->
+                <div class="md:col-span-2">
+                    <label class="flex items-center">
+                        <input type="checkbox" name="is_active" value="1" checked
+                               class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
+                        <span class="ml-2 text-sm text-gray-600">Película activa</span>
+                    </label>
                 </div>
 
                 <!-- Director -->

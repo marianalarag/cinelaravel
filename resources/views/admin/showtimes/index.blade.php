@@ -33,8 +33,8 @@
             @forelse($showtimes as $showtime)
                 <tr>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm font-medium text-gray-900">{{ $showtime->movie->title }}</div>
-                        <div class="text-sm text-gray-500">{{ $showtime->movie->duration }} min</div>
+                        <div class="text-sm font-medium text-gray-900">{{ $showtime->room->name }}</div>
+                        <div class="text-sm text-gray-500">{{ strtoupper($showtime->room->type) }}</div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="text-sm font-medium text-gray-900">{{ $showtime->room->name }}</div>

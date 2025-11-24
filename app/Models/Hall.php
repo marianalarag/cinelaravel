@@ -5,13 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Room extends Model
+class Hall extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'name',
-        'capacity',
+        'capacity', // Asegúrate de que capacity esté aquí
         'type',
         'features',
         'is_active',
@@ -23,7 +23,7 @@ class Room extends Model
     ];
 
     /**
-     * Get the showtimes for the room.
+     * Get the showtimes for the hall.
      */
     public function showtimes()
     {
@@ -31,7 +31,7 @@ class Room extends Model
     }
 
     /**
-     * Check if the room is available for a showtime
+     * Check if the hall is available for a showtime
      */
     public function isAvailableForShowtime($startTime, $endTime)
     {
@@ -44,7 +44,7 @@ class Room extends Model
     }
 
     /**
-     * Scope a query to only include active rooms.
+     * Scope a query to only include active halls.
      */
     public function scopeActive($query)
     {

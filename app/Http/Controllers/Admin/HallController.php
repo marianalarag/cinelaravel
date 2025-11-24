@@ -57,9 +57,16 @@ class HallController extends Controller
             'capacity' => 'required|integer|min:1',
             'type' => 'required|in:standard,imax,4dx',
             'features' => 'nullable|string',
+            'is_active' => 'boolean',
         ]);
 
-        $hall->update($request->all());
+        $hall->update([
+            'name' => $request->name,
+            'capacity' => $request->capacity,
+            'type' => $request->type,
+            'features' => $request->features,
+            'is_active' => $request->has('is_active'),
+        ]);
 
         return redirect()->route('admin.halls.index')
             ->with('success', 'Sala actualizada correctamente.');

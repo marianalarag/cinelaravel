@@ -72,16 +72,16 @@
 
                 <!-- Formato -->
                 <div>
-                    <label for="format" class="block text-sm font-medium text-gray-700">Formato</label>
-                    <select name="format" id="format" required
+                    <label for="movie_format" class="block text-sm font-medium text-gray-700">Formato</label>
+                    <select name="movie_format" id="movie_format" required
                             class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                         <option value="">Seleccionar formato</option>
-                        <option value="2D" {{ old('format') == '2D' ? 'selected' : '' }}>2D</option>
-                        <option value="3D" {{ old('format') == '3D' ? 'selected' : '' }}>3D</option>
-                        <option value="IMAX" {{ old('format') == 'IMAX' ? 'selected' : '' }}>IMAX</option>
-                        <option value="4DX" {{ old('format') == '4DX' ? 'selected' : '' }}>4DX</option>
+                        <option value="2D" {{ old('movie_format') == '2D' ? 'selected' : '' }}>2D</option>
+                        <option value="3D" {{ old('movie_format') == '3D' ? 'selected' : '' }}>3D</option>
+                        <option value="IMAX" {{ old('movie_format') == 'IMAX' ? 'selected' : '' }}>IMAX</option>
+                        <option value="4DX" {{ old('movie_format') == '4DX' ? 'selected' : '' }}>4DX</option>
                     </select>
-                    @error('format')
+                    @error('movie_format')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>

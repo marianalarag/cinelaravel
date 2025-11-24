@@ -17,7 +17,7 @@ class Showtime extends Model
         'price',
         'available_seats',
         'is_active',
-        'format',
+        'format', // Mantener como format en la base de datos
         'language',
     ];
 
@@ -25,47 +25,38 @@ class Showtime extends Model
         'start_time' => 'datetime',
         'end_time' => 'datetime',
         'price' => 'decimal:2',
-        'available_seats' => 'integer',
         'is_active' => 'boolean',
     ];
 
+    /**
+     * Get the movie for the showtime.
+     */
     public function movie()
     {
         return $this->belongsTo(Movie::class);
     }
 
+    /**
+     * Get the room for the showtime.
+     */
     public function room()
     {
         return $this->belongsTo(Room::class);
     }
 
-    public function tickets()
+    /**
+     * Get the bookings for the showtime.
+     */
+    public function bookings()
     {
-        return $this->hasMany(Ticket::class);
+        return $this->hasMany(Booking::class);
     }
 
+    /**
+     * Scope a query to only include active showtimes.
+     */
     public function scopeActive($query)
     {
-        return $query->where('is_active', true)
-            ->where('start_time', '>', now());
-    }
-
-    public function scopeAvailable($query)
-    {
-        return $query->where('available_seats', '>', 0)
-            ->where('is_active', true)
-            ->where('start_time', '>', now()->addHours(1));
-    }
-
-    // Calcular asientos ocupados
-    public function getOccupiedSeatsAttribute()
-    {
-        return $this->tickets()->whereIn('status', ['confirmed', 'reserved'])->count();
-    }
-
-    // Verificar si hay asientos disponibles
-    public function hasAvailableSeats()
-    {
-        return $this->available_seats > $this->occupied_seats;
+        return $query->where('is_active', true);
     }
 }

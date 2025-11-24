@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Models\Role;
+use Spatie\Permission\Models\Role; // Agregar este import
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -21,6 +21,7 @@ class UserController extends Controller
         $roles = Role::all();
         return view('admin.users.create', compact('roles'));
     }
+
 
     public function store(Request $request)
     {
