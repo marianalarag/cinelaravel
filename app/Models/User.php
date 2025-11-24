@@ -45,4 +45,24 @@ class User extends Authenticatable
     protected $appends = [
         'profile_photo_url',
     ];
+
+    public function getInitialsAttribute()
+    {
+        $names = explode(' ', $this->name);
+        $initials = '';
+
+        foreach ($names as $name) {
+            $initials .= strtoupper(substr($name, 0, 1));
+        }
+
+        return substr($initials, 0, 2);
+    }
+    /**
+     * Para compatibilidad con JetStream
+     */
+    public function initials()
+    {
+        return $this->getInitialsAttribute();
+    }
 }
+
