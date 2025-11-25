@@ -1,231 +1,179 @@
-<x-admin-layout
-    title="{{ $movie->title }} - CineLaravel"
-    :breadcrumbs="[
-        ['name' => 'Dashboard', 'href' => route('admin.dashboard')],
-        ['name' => 'Películas', 'href' => route('admin.movies.index')],
-        ['name' => $movie->title]
-    ]"
-    headerTitle="{{ $movie->title }}"
-    headerDescription="Detalles completos de la película"
->
-    <x-slot name="actions">
-        <div class="flex space-x-2">
-            <a href="{{ route('admin.movies.edit', $movie) }}"
-               class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md inline-flex items-center text-sm font-medium transition-colors shadow-sm">
-                <i class="fas fa-edit w-4 h-4 mr-2"></i>
-                Editar
-            </a>
-            <a href="{{ route('admin.showtimes.create') }}?movie={{ $movie->id }}"
-               class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md inline-flex items-center text-sm font-medium transition-colors shadow-sm">
-                <i class="fas fa-calendar-plus w-4 h-4 mr-2"></i>
-                Nueva Función
-            </a>
-            <a href="{{ route('admin.movies.index') }}"
-               class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md inline-flex items-center text-sm font-medium transition-colors shadow-sm">
-                <i class="fas fa-arrow-left w-4 h-4 mr-2"></i>
-                Volver
-            </a>
-        </div>
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            {{ __('Detalles de Película') }}
+        </h2>
     </x-slot>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Columna izquierda: Información de la película -->
-        <div class="lg:col-span-2 space-y-6">
-            <!-- Información Principal -->
-            <div class="bg-white rounded-lg shadow-sm border p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Información General</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="text-sm font-medium text-gray-500">Título</label>
-                        <p class="text-sm text-gray-900">{{ $movie->title }}</p>
-                    </div>
-                    <div>
-                        <label class="text-sm font-medium text-gray-500">Director</label>
-                        <p class="text-sm text-gray-900">{{ $movie->director }}</p>
-                    </div>
-                    <div>
-                        <label class="text-sm font-medium text-gray-500">Género</label>
-                        <p class="text-sm text-gray-900">{{ $movie->genre }}</p>
-                        @if($movie->genreRelation)
-                            <p class="text-xs text-gray-500">{{ $movie->genreRelation->description }}</p>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <!-- Poster -->
+        <div class="lg:col-span-1">
+            <div class="bg-gray-100 rounded-lg p-4 text-center">
+                <div class="max-w-xs mx-auto">
+                    <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                        @if($movie->poster_url)
+                            <img src="{{ $movie->poster_url }}"
+                                 alt="{{ $movie->title }}"
+                                 class="w-full h-auto object-cover"
+                                 onerror="this.style.display='none'">
                         @endif
-                    </div>
-                    <div>
-                        <label class="text-sm font-medium text-gray-500">Duración</label>
-                        <p class="text-sm text-gray-900">{{ $movie->duration }} minutos</p>
-                    </div>
-                    <div>
-                        <label class="text-sm font-medium text-gray-500">Rating</label>
-                        <div class="flex items-center">
-                            <i class="fas fa-star text-yellow-400 mr-1"></i>
-                            <span class="text-sm text-gray-900">{{ $movie->rating ?? 'N/A' }}/10</span>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="text-sm font-medium text-gray-500">Fecha de Estreno</label>
-                        <p class="text-sm text-gray-900">{{ $movie->release_date->format('d/m/Y') }}</p>
-                        <p class="text-xs text-gray-500">{{ $movie->release_date->diffForHumans() }}</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Sinopsis -->
-            <div class="bg-white rounded-lg shadow-sm border p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Sinopsis</h3>
-                <p class="text-gray-700 leading-relaxed">{{ $movie->description }}</p>
-            </div>
-
-            <!-- Reparto -->
-            <div class="bg-white rounded-lg shadow-sm border p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Reparto</h3>
-                <p class="text-gray-700">{{ $movie->cast }}</p>
-            </div>
-
-            <!-- Funciones Programadas -->
-            <div class="bg-white rounded-lg shadow-sm border p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold text-gray-900">Funciones Programadas</h3>
-                    <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
-                        {{ $movie->showtimes->count() }} función(es)
-                    </span>
-                </div>
-
-                @if($movie->showtimes->count() > 0)
-                    <div class="space-y-3">
-                        @foreach($movie->showtimes as $showtime)
-                            <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
-                                <div class="flex-1">
-                                    <div class="flex items-center space-x-4">
-                                        <div class="text-sm">
-                                            <p class="font-medium text-gray-900">{{ $showtime->room->name }}</p>
-                                            <p class="text-gray-500 text-xs">{{ strtoupper($showtime->room->type) }}</p>
-                                        </div>
-                                        <div class="text-sm">
-                                            <p class="font-medium text-gray-900">{{ $showtime->start_time->format('d/m/Y H:i') }}</p>
-                                            <p class="text-gray-500 text-xs">a {{ $showtime->end_time->format('H:i') }}</p>
-                                        </div>
-                                        <div class="text-sm">
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                                                {{ $showtime->format }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="flex items-center space-x-2">
-                                    <span class="text-sm font-medium text-gray-900">${{ number_format($showtime->price, 2) }}</span>
-                                    <a href="{{ route('admin.showtimes.edit', $showtime) }}"
-                                       class="text-indigo-600 hover:text-indigo-900 text-sm">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
+                        @if(!$movie->poster_url || !filter_var($movie->poster_url, FILTER_VALIDATE_URL))
+                            <div class="h-96 flex items-center justify-center bg-gradient-to-br from-blue-100 to-purple-100">
+                                <div class="text-center">
+                                    <i class="fas fa-film text-4xl text-gray-400 mb-2"></i>
+                                    <p class="text-gray-500 font-medium">{{ $movie->title }}</p>
+                                    <p class="text-gray-400 text-sm">{{ $movie->genre }}</p>
                                 </div>
                             </div>
-                        @endforeach
+                        @endif
                     </div>
-                @else
-                    <div class="text-center py-8">
-                        <i class="fas fa-calendar-times text-4xl text-gray-300 mb-3"></i>
-                        <p class="text-gray-500 mb-4">No hay funciones programadas para esta película</p>
-                        <a href="{{ route('admin.showtimes.create') }}?movie={{ $movie->id }}"
-                           class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md inline-flex items-center text-sm font-medium transition-colors">
-                            <i class="fas fa-calendar-plus w-4 h-4 mr-2"></i>
-                            Programar Primera Función
-                        </a>
-                    </div>
-                @endif
+                </div>
             </div>
         </div>
 
-        <!-- Columna derecha: Poster y información adicional -->
-        <div class="space-y-6">
-            <!-- Poster -->
-            <div class="bg-white rounded-lg shadow-sm border p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Poster</h3>
-                @if($movie->poster_url)
-                    <img src="{{ Storage::disk('public')->url($movie->poster_url) }}"
-                         alt="{{ $movie->title }}"
-                         class="w-full rounded-lg shadow-sm">
-                @else
-                    <div class="bg-gray-100 rounded-lg h-64 flex items-center justify-center">
-                        <i class="fas fa-film text-4xl text-gray-400"></i>
-                    </div>
-                @endif
-            </div>
+        <!-- Información -->
+        <div class="lg:col-span-2">
+                        <h1 class="text-3xl font-bold text-gray-900 mb-4">{{ $movie->title }}</h1>
 
-            <!-- Estado y Metadatos -->
-            <div class="bg-white rounded-lg shadow-sm border p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Estado</h3>
-                <div class="space-y-3">
-                    <div class="flex justify-between items-center">
-                        <span class="text-sm font-medium text-gray-500">Estado</span>
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium {{ $movie->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                            {{ $movie->is_active ? 'Activa' : 'Inactiva' }}
-                        </span>
-                    </div>
+                        <!-- Badge de estado -->
+                        <div class="flex items-center mb-4">
+                            @if($movie->release_date->isFuture())
+                                <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium">
+                                    <i class="fas fa-clock mr-1"></i>
+                                    Próximamente
+                                </span>
+                            @else
+                                <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                                    <i class="fas fa-play-circle mr-1"></i>
+                                    En cartelera
+                                </span>
+                            @endif
+                            <span class="ml-2 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                                {{ $movie->genre }}
+                            </span>
+                        </div>
 
-                    <div class="flex justify-between items-center">
-                        <span class="text-sm font-medium text-gray-500">ID</span>
-                        <span class="text-sm text-gray-900">{{ $movie->id }}</span>
-                    </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                            <div class="space-y-2">
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-clock mr-2 w-4"></i>
+                                    <span><strong>Duración:</strong> {{ $movie->duration }} minutos</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-calendar-alt mr-2 w-4"></i>
+                                    <span><strong>Estreno:</strong> {{ $movie->release_date->format('d/m/Y') }}</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-user-tie mr-2 w-4"></i>
+                                    <span><strong>Director:</strong> {{ $movie->director }}</span>
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="flex items-start text-sm text-gray-600">
+                                    <i class="fas fa-users mr-2 w-4 mt-0.5"></i>
+                                    <span><strong>Reparto:</strong> {{ $movie->cast }}</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-star mr-2 w-4 text-yellow-400"></i>
+                                    <span><strong>Género:</strong> {{ $movie->genre }}</span>
+                                </div>
+                            </div>
+                        </div>
 
-                    <div class="flex justify-between items-center">
-                        <span class="text-sm font-medium text-gray-500">Creada</span>
-                        <span class="text-sm text-gray-900">{{ $movie->created_at->format('d/m/Y H:i') }}</span>
-                    </div>
+                        <!-- Sinopsis -->
+                        <div class="mb-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Sinopsis</h3>
+                            <p class="text-gray-700 leading-relaxed">{{ $movie->description }}</p>
+                        </div>
 
-                    <div class="flex justify-between items-center">
-                        <span class="text-sm font-medium text-gray-500">Actualizada</span>
-                        <span class="text-sm text-gray-900">{{ $movie->updated_at->format('d/m/Y H:i') }}</span>
+                        <!-- Acciones -->
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            @if($movie->release_date->isPast())
+                                <a href="{{ route('client.movies.showtimes', $movie) }}"
+                                   class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold text-center">
+                                    <i class="fas fa-ticket-alt mr-2"></i>
+                                    Ver Funciones Disponibles
+                                </a>
+                            @else
+                                <button class="bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold text-center cursor-not-allowed opacity-70"
+                                        title="Disponible a partir del {{ $movie->release_date->format('d/m/Y') }}">
+                                    <i class="fas fa-clock mr-2"></i>
+                                    Próximamente
+                                </button>
+                            @endif
+                            <a href="{{ route('client.movies.index') }}"
+                               class="border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 transition-colors text-center">
+                                <i class="fas fa-arrow-left mr-2"></i>
+                                Volver a Cartelera
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Trailer -->
+            <!-- Trailer (si existe) -->
             @if($movie->trailer_url)
-                <div class="bg-white rounded-lg shadow-sm border p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Trailer</h3>
-                    <a href="{{ $movie->trailer_url }}"
-                       target="_blank"
-                       class="inline-flex items-center text-blue-600 hover:text-blue-800 text-sm">
-                        <i class="fas fa-external-link-alt mr-2"></i>
-                        Ver trailer en YouTube
-                    </a>
+                <div class="mt-8 bg-white rounded-lg shadow-sm p-6">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4">Tráiler</h3>
+                    <div class="aspect-w-16 aspect-h-9">
+                        <iframe src="{{ $movie->trailer_url }}"
+                                class="w-full h-64 md:h-96 rounded-lg"
+                                frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowfullscreen>
+                        </iframe>
+                    </div>
                 </div>
             @endif
 
-            <!-- Acciones Rápidas -->
-            <div class="bg-white rounded-lg shadow-sm border p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Acciones Rápidas</h3>
-                <div class="space-y-2">
-                    <form action="{{ route('admin.movies.toggle-status', $movie) }}" method="POST" class="w-full">
-                        @csrf
-                        @method('PUT')
-                        <button type="submit"
-                                class="w-full text-left px-4 py-2 text-sm {{ $movie->is_active ? 'text-red-700 hover:bg-red-50' : 'text-green-700 hover:bg-green-50' }} rounded-md transition-colors">
-                            <i class="fas fa-power-off mr-2"></i>
-                            {{ $movie->is_active ? 'Desactivar Película' : 'Activar Película' }}
-                        </button>
-                    </form>
+            <!-- Funciones próximas (si hay) -->
+            @if(isset($showtimes) && $showtimes->count() > 0)
+                <div class="mt-8 bg-white rounded-lg shadow-sm p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-semibold text-gray-900">Próximas Funciones</h3>
+                        <a href="{{ route('client.movies.showtimes', $movie) }}"
+                           class="text-blue-600 hover:text-blue-800 font-medium">
+                            Ver todas las funciones
+                        </a>
+                    </div>
 
-                    <a href="{{ route('admin.showtimes.create') }}?movie={{ $movie->id }}"
-                       class="w-full text-left px-4 py-2 text-sm text-blue-700 hover:bg-blue-50 rounded-md transition-colors block">
-                        <i class="fas fa-calendar-plus mr-2"></i>
-                        Nueva Función
-                    </a>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        @foreach($showtimes->take(3) as $date => $dayShowtimes)
+                            @foreach($dayShowtimes->take(2) as $showtime)
+                                <div class="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors">
+                                    <div class="flex justify-between items-start mb-3">
+                                        <div>
+                                            <p class="font-semibold text-gray-900">{{ $showtime->start_time->format('H:i') }}</p>
+                                            <p class="text-sm text-gray-600">{{ $showtime->room->name }}</p>
+                                        </div>
+                                        <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
+                                            {{ $showtime->format }}
+                                        </span>
+                                    </div>
 
-                    @if($movie->showtimes->count() == 0)
-                        <form action="{{ route('admin.movies.destroy', $movie) }}" method="POST" class="w-full">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit"
-                                    class="w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-red-50 rounded-md transition-colors"
-                                    onclick="return confirm('¿Estás seguro de eliminar esta película?')">
-                                <i class="fas fa-trash mr-2"></i>
-                                Eliminar Película
-                            </button>
-                        </form>
-                    @endif
+                                    <div class="space-y-1 text-sm text-gray-600 mb-4">
+                                        <p><strong>Idioma:</strong> {{ $showtime->language }}</p>
+                                        <p><strong>Asientos disponibles:</strong> {{ $showtime->available_seats }}</p>
+                                        <p class="text-lg font-bold text-gray-900">${{ number_format($showtime->price, 2) }}</p>
+                                    </div>
+
+                                    @if($showtime->available_seats > 0)
+                                        <a href="{{ route('client.movies.showtimes', $movie) }}"
+                                           class="w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition-colors font-semibold text-center block">
+                                            Reservar
+                                        </a>
+                                    @else
+                                        <button disabled
+                                                class="w-full bg-gray-300 text-gray-500 py-2 px-4 rounded cursor-not-allowed font-semibold">
+                                            Agotado
+                                        </button>
+                                    @endif
+                                </div>
+                            @endforeach
+                        @endforeach
+                    </div>
                 </div>
-            </div>
+            @endif
         </div>
     </div>
-</x-admin-layout>
+</x-app-layout>

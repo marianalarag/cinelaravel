@@ -1,61 +1,109 @@
 <?php
 
-use App\Livewire\Settings\Appearance;
-use App\Livewire\Settings\Password;
-use App\Livewire\Settings\Profile;
-use App\Livewire\Settings\TwoFactor;
-use Illuminate\Support\Facades\Route;
-use Laravel\Fortify\Features;
+use App\Http\Controllers\Client\ClientMovieController;
+use App\Http\Controllers\Client\ClientBookingController;
+use App\Http\Controllers\Staff\StaffBookingController;
+use App\Http\Controllers\Staff\StaffShowtimeController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\MovieController;
-use App\Http\Controllers\Admin\HallController;
 use App\Http\Controllers\Admin\ShowtimeController;
+use App\Http\Controllers\Admin\HallController;
 use App\Http\Controllers\Admin\GenreController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\BookingController;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 
+// ==================== RUTA PRINCIPAL ====================
 Route::get('/', function () {
-    return view('welcome');
+    // Redirigir directamente a la página de películas
+    return redirect()->route('movies.index');
 })->name('home');
 
-// Dashboard principal - redirecciona al admin dashboard si es admin
-Route::view('dashboard', 'dashboard')
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
 
-Route::middleware(['auth'])->group(function () {
-    Route::redirect('settings', 'settings/profile');
+// ==================== RUTAS PÚBLICAS ====================
+// Ruta dashboard pública que redirige según autenticación y rol
+Route::get('/dashboard', function () {
+    if (auth()->check()) {
+        $user = Auth::user();
 
-    Route::get('settings/profile', Profile::class)->name('profile.edit');
-    Route::get('settings/password', Password::class)->name('user-password.edit');
-    Route::get('settings/appearance', Appearance::class)->name('appearance.edit');
+        if ($user->hasRole('admin')) {
+            return redirect()->route('admin.dashboard');
+        } elseif ($user->hasRole('staff')) {
+            return redirect()->route('staff.dashboard');
+        } else {
+            return redirect()->route('client.dashboard');
+        }
+    }
+    return redirect('/');
+})->name('dashboard');
 
-    Route::get('settings/two-factor', TwoFactor::class)
-        ->middleware(
-            when(
-                Features::canManageTwoFactorAuthentication()
-                && Features::optionEnabled(Features::twoFactorAuthentication(), 'confirmPassword'),
-                ['password.confirm'],
-                [],
-            ),
-        )
-        ->name('two-factor.show');
-});
+// Rutas públicas para películas (accesibles sin login)
+Route::get('/movies', [ClientMovieController::class, 'index'])->name('movies.index');
+Route::get('/movies/now-showing', [ClientMovieController::class, 'nowShowing'])->name('movies.now-showing');
+Route::get('/movies/coming-soon', [ClientMovieController::class, 'comingSoon'])->name('movies.coming-soon');
+Route::get('/movies/{movie}', [ClientMovieController::class, 'show'])->name('movies.show');
+Route::get('/movies/{movie}/showtimes', [ClientMovieController::class, 'showtimes'])->name('movies.showtimes');
 
+// ==================== RUTAS AUTENTICADAS ====================
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {
-    // Dashboard mejorado - redirecciona al admin dashboard si es admin
-    Route::get('/dashboard', function () {
-        if (auth()->check() && auth()->user()->hasRole('admin')) {
-            return redirect()->route('admin.dashboard');
-        }
-        return view('dashboard');
-    })->name('dashboard');
 
-    // Admin Routes Group
+    // ==================== CLIENT ROUTES ====================
+    Route::prefix('client')->name('client.')->middleware(['role:client'])->group(function () {
+        // Dashboard Cliente
+        Route::get('/dashboard', function () {
+            return view('dashboard.client');
+        })->name('dashboard');
+
+        // Mis Reservas
+        Route::get('/my-bookings', [ClientBookingController::class, 'myBookings'])->name('bookings.my-bookings');
+        Route::get('/bookings/{booking}', [ClientBookingController::class, 'show'])->name('bookings.show');
+        Route::post('/bookings', [ClientBookingController::class, 'store'])->name('bookings.store');
+        Route::delete('/bookings/{booking}', [ClientBookingController::class, 'cancel'])->name('bookings.cancel');
+
+        // Películas para cliente
+        Route::get('/movies', [ClientMovieController::class, 'index'])->name('movies.index');
+        Route::get('/movies/{movie}', [ClientMovieController::class, 'show'])->name('movies.show');
+        Route::get('/movies/{movie}/showtimes', [ClientMovieController::class, 'showtimes'])->name('movies.showtimes');
+        Route::get('/movies/now-showing', [ClientMovieController::class, 'nowShowing'])->name('movies.now-showing');
+        Route::get('/movies/coming-soon', [ClientMovieController::class, 'comingSoon'])->name('movies.coming-soon');
+    });
+
+    // ==================== STAFF ROUTES ====================
+    Route::prefix('staff')->name('staff.')->middleware(['role:staff'])->group(function () {
+        // Dashboard Staff
+        Route::get('/dashboard', function () {
+            return view('dashboard.staff');
+        })->name('dashboard');
+
+        // Gestión de Reservas
+        Route::get('/bookings', [StaffBookingController::class, 'index'])->name('bookings.index');
+        Route::get('/bookings/create', [StaffBookingController::class, 'create'])->name('bookings.create');
+        Route::get('/bookings/today', [StaffBookingController::class, 'today'])->name('bookings.today');
+        Route::post('/bookings', [StaffBookingController::class, 'store'])->name('bookings.store');
+        Route::get('/bookings/{booking}', [StaffBookingController::class, 'show'])->name('bookings.show');
+        Route::put('/bookings/{booking}', [StaffBookingController::class, 'update'])->name('bookings.update');
+        Route::delete('/bookings/{booking}', [StaffBookingController::class, 'destroy'])->name('bookings.destroy');
+        Route::put('/bookings/{booking}/toggle-status', [StaffBookingController::class, 'toggleStatus'])
+            ->name('bookings.toggle-status');
+
+        // Gestión de Funciones
+        Route::get('/showtimes', [StaffShowtimeController::class, 'index'])->name('showtimes.index');
+        Route::get('/showtimes/create', [StaffShowtimeController::class, 'create'])->name('showtimes.create');
+        Route::get('/showtimes/today', [StaffShowtimeController::class, 'today'])->name('showtimes.today');
+        Route::post('/showtimes', [StaffShowtimeController::class, 'store'])->name('showtimes.store');
+        Route::get('/showtimes/{showtime}', [StaffShowtimeController::class, 'show'])->name('showtimes.show');
+        Route::put('/showtimes/{showtime}', [StaffShowtimeController::class, 'update'])->name('showtimes.update');
+        Route::delete('/showtimes/{showtime}', [StaffShowtimeController::class, 'destroy'])->name('showtimes.destroy');
+        Route::put('/showtimes/{showtime}/toggle-status', [StaffShowtimeController::class, 'toggleStatus'])
+            ->name('showtimes.toggle-status');
+    });
+
+    // ==================== ADMIN ROUTES ====================
     Route::prefix('admin')->name('admin.')->middleware(['role:admin'])->group(function () {
         // Dashboard
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');

@@ -6,29 +6,32 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Fortify\TwoFactorAuthenticatable;
-use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
-use Spatie\Permission\Traits\HasRoles; // Agregar esta línea
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasApiTokens;
-    use HasFactory;
-    use HasProfilePhoto;
-    use Notifiable;
-    use TwoFactorAuthenticatable;
-    use HasRoles;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
         'name',
         'email',
         'password',
         'phone',
-        'birth_date',
+        'date_of_birth',
         'is_active',
     ];
 
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var array<int, string>
+     */
     protected $hidden = [
         'password',
         'remember_token',
@@ -36,33 +39,15 @@ class User extends Authenticatable
         'two_factor_secret',
     ];
 
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'birth_date' => 'date',
+        'password' => 'hashed',
+        'date_of_birth' => 'date',
         'is_active' => 'boolean',
     ];
-
-    protected $appends = [
-        'profile_photo_url',
-    ];
-
-    public function getInitialsAttribute()
-    {
-        $names = explode(' ', $this->name);
-        $initials = '';
-
-        foreach ($names as $name) {
-            $initials .= strtoupper(substr($name, 0, 1));
-        }
-
-        return substr($initials, 0, 2);
-    }
-    /**
-     * Para compatibilidad con JetStream
-     */
-    public function initials()
-    {
-        return $this->getInitialsAttribute();
-    }
 }
-

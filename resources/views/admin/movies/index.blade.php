@@ -53,84 +53,111 @@
 
                 <!-- Contador -->
                 <div class="text-sm text-gray-600 px-3 py-1 bg-gray-100 rounded-full">
-                    {{ $movies->count() }} película(s)
+                    {{ $movies->total() }} película(s)
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Alertas -->
+    @if(session('success'))
+        <div class="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-check-circle text-green-400 text-lg"></i>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-green-800">
+                        {{ session('success') }}
+                    </h3>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-circle text-red-400 text-lg"></i>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-red-800">
+                        {{ session('error') }}
+                    </h3>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <!-- Tabla de Películas -->
-    <div class="bg-white rounded-lg shadow-sm border overflow-hidden">
+    <div class="bg-white shadow-sm rounded-lg border overflow-hidden">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Película</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Información</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Género</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rating</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estreno</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Película
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Género
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Duración
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Estreno
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Estado
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Acciones
+                    </th>
                 </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                 @forelse($movies as $movie)
                     <tr class="hover:bg-gray-50 transition-colors">
-                        <!-- Poster y Título -->
+                        <!-- Información de la Película -->
                         <td class="px-6 py-4">
-                            <div class="flex items-center space-x-3">
-                                <div class="flex-shrink-0">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-12 w-12 bg-gray-200 rounded overflow-hidden">
                                     @if($movie->poster_url)
-                                        <img src="{{ Storage::disk('public')->url($movie->poster_url) }}"
+                                        <img src="{{ $movie->poster_url }}"
                                              alt="{{ $movie->title }}"
-                                             class="h-16 w-12 object-cover rounded-lg shadow-sm">
-                                    @else
-                                        <div class="h-16 w-12 bg-gray-200 rounded-lg flex items-center justify-center">
+                                             class="h-12 w-12 object-cover"
+                                             onerror="this.style.display='none'">
+                                    @endif
+                                    @if(!$movie->poster_url || !filter_var($movie->poster_url, FILTER_VALIDATE_URL))
+                                        <div class="h-12 w-12 flex items-center justify-center bg-gray-100">
                                             <i class="fas fa-film text-gray-400"></i>
                                         </div>
                                     @endif
                                 </div>
-                                <div class="min-w-0 flex-1">
-                                    <div class="text-sm font-semibold text-gray-900 truncate">{{ $movie->title }}</div>
-                                    <div class="text-xs text-gray-500 mt-1">
-                                        <i class="fas fa-clock mr-1"></i>{{ $movie->duration }} min
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium text-gray-900">
+                                        {{ $movie->title }}
                                     </div>
-                                </div>
-                            </div>
-                        </td>
-
-                        <!-- Información -->
-                        <td class="px-6 py-4">
-                            <div class="text-sm text-gray-900">
-                                <div class="flex items-center text-xs text-gray-500 mb-1">
-                                    <i class="fas fa-user-tie mr-1"></i>
-                                    {{ $movie->director }}
-                                </div>
-                                <div class="text-xs text-gray-500">
-                                    <i class="fas fa-users mr-1"></i>
-                                    {{ Str::limit($movie->cast, 30) }}
+                                    <div class="text-sm text-gray-500">
+                                        {{ Str::limit($movie->description, 50) }}
+                                    </div>
                                 </div>
                             </div>
                         </td>
 
                         <!-- Género -->
                         <td class="px-6 py-4">
-                            <div class="flex flex-col">
-                                <span class="text-sm font-medium text-gray-900">{{ $movie->genre }}</span>
-                                @if($movie->genreRelation)
-                                    <span class="text-xs text-gray-500">{{ $movie->genreRelation->description }}</span>
-                                @endif
-                            </div>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                {{ $movie->genre }}
+                            </span>
                         </td>
 
-                        <!-- Rating -->
+                        <!-- Duración -->
                         <td class="px-6 py-4">
-                            <div class="flex items-center">
-                                <div class="flex items-center text-sm text-gray-900">
-                                    <i class="fas fa-star text-yellow-400 mr-1"></i>
-                                    {{ $movie->rating ?? 'N/A' }}/10
-                                </div>
+                            <div class="flex items-center text-sm text-gray-900">
+                                <i class="fas fa-clock text-gray-400 mr-1"></i>
+                                {{ $movie->duration }} min
                             </div>
                         </td>
 
@@ -140,7 +167,11 @@
                                 {{ $movie->release_date->format('d/m/Y') }}
                             </div>
                             <div class="text-xs text-gray-500">
-                                {{ $movie->release_date->diffForHumans() }}
+                                @if($movie->release_date->isFuture())
+                                    <span class="text-orange-600">En {{ $movie->release_date->diffForHumans() }}</span>
+                                @else
+                                    <span class="text-green-600">Hace {{ $movie->release_date->diffForHumans() }}</span>
+                                @endif
                             </div>
                         </td>
 
@@ -150,14 +181,18 @@
                                 @csrf
                                 @method('PUT')
                                 <button type="submit"
-                                        class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium transition-colors {{ $movie->is_active ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-red-100 text-red-800 hover:bg-red-200' }}">
+                                        class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium transition-colors {{ $movie->is_active ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-red-100 text-red-800 hover:bg-red-200' }}"
+                                        onclick="return confirm('¿Estás seguro de cambiar el estado de esta película?')">
                                     <span class="w-2 h-2 rounded-full mr-1 {{ $movie->is_active ? 'bg-green-500' : 'bg-red-500' }}"></span>
                                     {{ $movie->is_active ? 'Activa' : 'Inactiva' }}
                                 </button>
                             </form>
-                            @if($movie->showtimes_count > 0)
+                            @php
+                                $showtimesCount = $movie->showtimes()->count();
+                            @endphp
+                            @if($showtimesCount > 0)
                                 <div class="text-xs text-blue-600 mt-1">
-                                    {{ $movie->showtimes_count }} función(es)
+                                    {{ $showtimesCount }} función(es)
                                 </div>
                             @endif
                         </td>
@@ -167,48 +202,51 @@
                             <div class="flex items-center space-x-2">
                                 <!-- Ver -->
                                 <a href="{{ route('admin.movies.show', $movie) }}"
-                                   class="text-blue-600 hover:text-blue-900 transition-colors"
+                                   class="text-blue-600 hover:text-blue-900 transition-colors p-1 rounded hover:bg-blue-50"
                                    title="Ver detalles">
-                                    <i class="fas fa-eye"></i>
+                                    <i class="fas fa-eye w-4 h-4"></i>
                                 </a>
 
                                 <!-- Editar -->
                                 <a href="{{ route('admin.movies.edit', $movie) }}"
-                                   class="text-indigo-600 hover:text-indigo-900 transition-colors"
+                                   class="text-indigo-600 hover:text-indigo-900 transition-colors p-1 rounded hover:bg-indigo-50"
                                    title="Editar">
-                                    <i class="fas fa-edit"></i>
+                                    <i class="fas fa-edit w-4 h-4"></i>
                                 </a>
 
                                 <!-- Funciones -->
                                 <a href="{{ route('admin.showtimes.index') }}?movie={{ $movie->id }}"
-                                   class="text-purple-600 hover:text-purple-900 transition-colors"
+                                   class="text-purple-600 hover:text-purple-900 transition-colors p-1 rounded hover:bg-purple-50"
                                    title="Ver funciones">
-                                    <i class="fas fa-calendar-alt"></i>
+                                    <i class="fas fa-calendar-alt w-4 h-4"></i>
                                 </a>
 
                                 <!-- Eliminar -->
-                                @if($movie->showtimes_count == 0)
+                                @php
+                                    $canDelete = $movie->showtimes()->count() == 0;
+                                @endphp
+                                @if($canDelete)
                                     <form action="{{ route('admin.movies.destroy', $movie) }}" method="POST" class="inline">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit"
-                                                class="text-red-600 hover:text-red-900 transition-colors"
+                                                class="text-red-600 hover:text-red-900 transition-colors p-1 rounded hover:bg-red-50"
                                                 title="Eliminar"
-                                                onclick="return confirm('¿Estás seguro de eliminar esta película?')">
-                                            <i class="fas fa-trash"></i>
+                                                onclick="return confirm('¿Estás seguro de eliminar esta película? Esta acción no se puede deshacer.')">
+                                            <i class="fas fa-trash w-4 h-4"></i>
                                         </button>
                                     </form>
                                 @else
-                                    <span class="text-gray-400 cursor-not-allowed" title="No se puede eliminar (tiene funciones)">
-                                        <i class="fas fa-trash"></i>
-                                    </span>
+                                    <span class="text-gray-400 cursor-not-allowed p-1" title="No se puede eliminar (tiene funciones asociadas)">
+                <i class="fas fa-trash w-4 h-4"></i>
+            </span>
                                 @endif
                             </div>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="px-6 py-12 text-center">
+                        <td colspan="6" class="px-6 py-12 text-center">
                             <div class="flex flex-col items-center justify-center text-gray-500">
                                 <i class="fas fa-film text-4xl mb-4 text-gray-300"></i>
                                 <p class="text-lg font-medium mb-2">No hay películas registradas</p>
@@ -233,4 +271,30 @@
             </div>
         @endif
     </div>
+
+    <style>
+        .line-clamp-2 {
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+        }
+    </style>
+
+    <script>
+        // Función para manejar errores de imagen
+        document.addEventListener('DOMContentLoaded', function() {
+            const images = document.querySelectorAll('img');
+            images.forEach(img => {
+                img.addEventListener('error', function() {
+                    this.style.display = 'none';
+                    // Mostrar placeholder si está disponible
+                    const placeholder = this.parentElement.querySelector('.fa-film');
+                    if (placeholder) {
+                        placeholder.parentElement.style.display = 'flex';
+                    }
+                });
+            });
+        });
+    </script>
 </x-admin-layout>

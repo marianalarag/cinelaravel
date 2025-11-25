@@ -20,12 +20,14 @@ class Movie extends Model
         'poster_url',
         'trailer_url',
         'is_active',
+        'is_showing',
         'release_date',
     ];
 
     protected $casts = [
         'rating' => 'decimal:1',
         'is_active' => 'boolean',
+        'is_showing' => 'boolean',
         'release_date' => 'date',
         'duration' => 'integer',
     ];

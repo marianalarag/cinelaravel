@@ -35,7 +35,10 @@
                         {{ $booking->showtime->room->name }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {{ implode(', ', json_decode($booking->seats, true)) }}
+                        @php
+                            $seats = $booking->seats ? json_decode($booking->seats, true) : [];
+                            echo $seats ? implode(', ', $seats) : 'N/A';
+                        @endphp
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         ${{ number_format($booking->total_price, 2) }}
