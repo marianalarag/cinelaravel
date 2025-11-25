@@ -73,7 +73,7 @@ Route::middleware([
         Route::get('/movies/coming-soon', [ClientMovieController::class, 'comingSoon'])->name('movies.coming-soon');
     });
 
-    // ==================== STAFF ROUTES ====================
+// ==================== STAFF ROUTES ====================
     Route::prefix('staff')->name('staff.')->middleware(['role:staff'])->group(function () {
         // Dashboard Staff
         Route::get('/dashboard', function () {
@@ -83,9 +83,10 @@ Route::middleware([
         // Gestión de Reservas
         Route::get('/bookings', [StaffBookingController::class, 'index'])->name('bookings.index');
         Route::get('/bookings/create', [StaffBookingController::class, 'create'])->name('bookings.create');
-        Route::get('/bookings/today', [StaffBookingController::class, 'today'])->name('bookings.today');
+        Route::get('/bookings/today', [StaffBookingController::class, 'today'])->name('bookings.today'); // <-- AGREGAR
         Route::post('/bookings', [StaffBookingController::class, 'store'])->name('bookings.store');
         Route::get('/bookings/{booking}', [StaffBookingController::class, 'show'])->name('bookings.show');
+        Route::get('/bookings/{booking}/edit', [StaffBookingController::class, 'edit'])->name('bookings.edit');
         Route::put('/bookings/{booking}', [StaffBookingController::class, 'update'])->name('bookings.update');
         Route::delete('/bookings/{booking}', [StaffBookingController::class, 'destroy'])->name('bookings.destroy');
         Route::put('/bookings/{booking}/toggle-status', [StaffBookingController::class, 'toggleStatus'])
@@ -94,9 +95,10 @@ Route::middleware([
         // Gestión de Funciones
         Route::get('/showtimes', [StaffShowtimeController::class, 'index'])->name('showtimes.index');
         Route::get('/showtimes/create', [StaffShowtimeController::class, 'create'])->name('showtimes.create');
-        Route::get('/showtimes/today', [StaffShowtimeController::class, 'today'])->name('showtimes.today');
+        Route::get('/showtimes/today', [StaffShowtimeController::class, 'today'])->name('showtimes.today'); // <-- AGREGAR
         Route::post('/showtimes', [StaffShowtimeController::class, 'store'])->name('showtimes.store');
         Route::get('/showtimes/{showtime}', [StaffShowtimeController::class, 'show'])->name('showtimes.show');
+        Route::get('/showtimes/{showtime}/edit', [StaffShowtimeController::class, 'edit'])->name('showtimes.edit');
         Route::put('/showtimes/{showtime}', [StaffShowtimeController::class, 'update'])->name('showtimes.update');
         Route::delete('/showtimes/{showtime}', [StaffShowtimeController::class, 'destroy'])->name('showtimes.destroy');
         Route::put('/showtimes/{showtime}/toggle-status', [StaffShowtimeController::class, 'toggleStatus'])

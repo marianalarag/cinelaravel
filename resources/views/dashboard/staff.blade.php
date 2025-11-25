@@ -192,7 +192,14 @@
                                         <p class="text-sm font-medium text-gray-900">${{ number_format($showtime->price, 2) }}</p>
                                         <p class="text-xs text-gray-500">
                                             @php
-                                                $occupiedSeats = $showtime->bookings()->sum('number_of_tickets');
+                                                // Si tienes el campo 'seats' que almacena los asientos como array/JSON
+                                                $occupiedSeats = $showtime->bookings()->get()->sum(function($booking) {
+                                                    if ($booking->seats) {
+                                                        $seats = json_decode($booking->seats, true);
+                                                        return is_array($seats) ? count($seats) : 0;
+                                                    }
+                                                    return 0;
+                                                });
                                                 $totalSeats = $showtime->room->capacity ?? 100;
                                             @endphp
                                             {{ $occupiedSeats }}/{{ $totalSeats }} asientos
