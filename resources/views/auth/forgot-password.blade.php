@@ -1,7 +1,7 @@
 <x-guest-layout>
     <x-authentication-card>
         <x-slot name="logo">
-            <x-authentication-card-logo />
+            <img src="https://www.pngplay.com/wp-content/uploads/6/Cinema-Icon-PNG-Clipart-Background.png" class="h-16 me-3" alt="CineLaravel Logo" />
         </x-slot>
 
         <div class="mb-4 text-sm text-gray-600">

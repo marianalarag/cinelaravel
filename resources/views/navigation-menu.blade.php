@@ -6,8 +6,9 @@
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('home') }}">
-                        <x-application-mark class="block h-9 w-auto" />
+                        <img src="https://www.pngplay.com/wp-content/uploads/6/Cinema-Icon-PNG-Clipart-Background.png" class="h-8 me-3" alt="CineLaravel Logo" />
                     </a>
+                    <span class="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap">CineLaravel</span>
                 </div>
 
                 <!-- Navigation Links -->
