@@ -76,13 +76,24 @@ class ClientMovieController extends Controller
             abort(404);
         }
 
-        $movie->load(['showtimes' => function($query) {
-            $query->where('start_time', '>', now())
-                ->where('is_active', true)
-                ->with('hall')
-                ->orderBy('start_time');
-        }]);
+        // Obtener showtimes
+        $showtimes = $movie->showtimes()
+            ->where('start_time', '>', now())
+            ->where('is_active', true)
+            ->with('room')
+            ->orderBy('start_time')
+            ->get();
 
-        return view('client.movies.showtimes', compact('movie'));
+        // Agrupar por fecha de forma segura
+        $groupedShowtimes = [];
+        foreach ($showtimes as $showtime) {
+            $date = $showtime->start_time->format('Y-m-d');
+            $groupedShowtimes[$date][] = $showtime;
+        }
+
+        return view('client.movies.showtimes', [
+            'movie' => $movie,
+            'showtimes' => $groupedShowtimes
+        ]);
     }
 }
