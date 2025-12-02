@@ -95,7 +95,7 @@ Route::middleware([
         // Gestión de Funciones
         Route::get('/showtimes', [StaffShowtimeController::class, 'index'])->name('showtimes.index');
         Route::get('/showtimes/create', [StaffShowtimeController::class, 'create'])->name('showtimes.create');
-        Route::get('/showtimes/today', [StaffShowtimeController::class, 'today'])->name('showtimes.today'); // <-- AGREGAR
+        Route::get('/showtimes/today', [StaffShowtimeController::class, 'today'])->name('showtimes.today');
         Route::post('/showtimes', [StaffShowtimeController::class, 'store'])->name('showtimes.store');
         Route::get('/showtimes/{showtime}', [StaffShowtimeController::class, 'show'])->name('showtimes.show');
         Route::get('/showtimes/{showtime}/edit', [StaffShowtimeController::class, 'edit'])->name('showtimes.edit');

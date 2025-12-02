@@ -1,193 +1,178 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('Gestión de Reservas - Staff') }}
-            </h2>
-            <a href="{{ route('staff.bookings.create') }}"
-               class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md inline-flex items-center text-sm font-medium transition-colors">
-                <i class="fas fa-plus w-4 h-4 mr-2"></i>
-                Nueva Reserva
-            </a>
-        </div>
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            {{ __('Gestión de Reservas - Admin') }}
+        </h2>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <!-- Filtros -->
-            <div class="mb-6 bg-white p-4 rounded-lg shadow-sm border">
-                <div class="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-                    <div class="flex flex-wrap gap-4">
-                        <a href="{{ route('staff.bookings.index') }}"
-                           class="px-3 py-1 text-sm rounded-full {{ !request('status') ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
-                            Todas
-                        </a>
-                        <a href="{{ request()->fullUrlWithQuery(['status' => 'confirmed']) }}"
-                           class="px-3 py-1 text-sm rounded-full {{ request('status') == 'confirmed' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
-                            Confirmadas
-                        </a>
-                        <a href="{{ request()->fullUrlWithQuery(['status' => 'pending']) }}"
-                           class="px-3 py-1 text-sm rounded-full {{ request('status') == 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
-                            Pendientes
-                        </a>
-                        <a href="{{ route('staff.bookings.today') }}"
-                           class="px-3 py-1 text-sm rounded-full bg-orange-100 text-orange-800">
-                            Hoy
-                        </a>
-                    </div>
-                    <div class="text-sm text-gray-600">
-                        {{ $bookings->total() }} reserva(s)
-                    </div>
-                </div>
-            </div>
-
-            <!-- Alertas -->
-            @if(session('success'))
-                <div class="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-check-circle text-green-400 text-lg"></i>
-                        </div>
-                        <div class="ml-3">
-                            <h3 class="text-sm font-medium text-green-800">
-                                {{ session('success') }}
-                            </h3>
-                        </div>
-                    </div>
+            @if (session('success'))
+                <div class="mb-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                    <span class="block sm:inline">{{ session('success') }}</span>
                 </div>
             @endif
 
-            @if(session('error'))
-                <div class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-exclamation-circle text-red-400 text-lg"></i>
-                        </div>
-                        <div class="ml-3">
-                            <h3 class="text-sm font-medium text-red-800">
-                                {{ session('error') }}
-                            </h3>
-                        </div>
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-semibold text-gray-900">Lista de Reservas</h3>
+                        <a href="{{ route('staff.bookings.create') }}"
+                           class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                            Crear Reserva
+                        </a>
                     </div>
-                </div>
-            @endif
 
-            <!-- Tabla de Reservas -->
-            <div class="bg-white shadow-sm rounded-lg border overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Película</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cliente</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha Función</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
-                        </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                        @forelse($bookings as $booking)
-                            <tr class="hover:bg-gray-50 transition-colors">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    #{{ $booking->id }}
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center">
-                                        <div class="flex-shrink-0 h-10 w-10 bg-gray-200 rounded overflow-hidden">
-                                            @if($booking->showtime->movie->poster_url)
-                                                <img src="{{ $booking->showtime->movie->poster_url }}"
-                                                     alt="{{ $booking->showtime->movie->title }}"
-                                                     class="h-10 w-10 object-cover">
-                                            @else
-                                                <div class="h-10 w-10 flex items-center justify-center bg-gray-100">
-                                                    <i class="fas fa-film text-gray-400"></i>
-                                                </div>
-                                            @endif
-                                        </div>
-                                        <div class="ml-4">
-                                            <div class="text-sm font-medium text-gray-900">
-                                                {{ $booking->showtime->movie->title }}
-                                            </div>
-                                            <div class="text-sm text-gray-500">
-                                                Sala {{ $booking->showtime->room->name ?? 'N/A' }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $booking->user->name }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $booking->showtime->start_time->format('d/m/Y H:i') }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    ${{ number_format($booking->total_amount ?? $booking->total_price ?? 0, 2) }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                        {{ $booking->status == 'confirmed' ? 'bg-green-100 text-green-800' :
-                                           ($booking->status == 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800') }}">
-                                        {{ ucfirst($booking->status) }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex items-center space-x-2">
-                                        <!-- Ver -->
-                                        <a href="{{ route('staff.bookings.show', $booking) }}"
-                                           class="text-blue-600 hover:text-blue-900 transition-colors p-1 rounded hover:bg-blue-50"
-                                           title="Ver detalles">
-                                            <i class="fas fa-eye w-4 h-4"></i>
-                                        </a>
-
-                                        <!-- Editar -->
-                                        <a href="{{ route('staff.bookings.edit', $booking) }}"
-                                           class="text-indigo-600 hover:text-indigo-900 transition-colors p-1 rounded hover:bg-indigo-50"
-                                           title="Editar">
-                                            <i class="fas fa-edit w-4 h-4"></i>
-                                        </a>
-
-                                        <!-- Cambiar Estado -->
-                                        <form action="{{ route('staff.bookings.toggle-status', $booking) }}" method="POST" class="inline">
-                                            @csrf
-                                            @method('PUT')
-                                            <button type="submit"
-                                                    class="text-green-600 hover:text-green-900 transition-colors p-1 rounded hover:bg-green-50"
-                                                    title="{{ $booking->status == 'confirmed' ? 'Cancelar' : 'Confirmar' }}"
-                                                    onclick="return confirm('¿Estás seguro de cambiar el estado de esta reserva?')">
-                                                <i class="fas {{ $booking->status == 'confirmed' ? 'fa-times' : 'fa-check' }} w-4 h-4"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
                             <tr>
-                                <td colspan="7" class="px-6 py-12 text-center">
-                                    <div class="flex flex-col items-center justify-center text-gray-500">
-                                        <i class="fas fa-ticket-alt text-4xl mb-4 text-gray-300"></i>
-                                        <p class="text-lg font-medium mb-2">No hay reservas</p>
-                                        <p class="text-sm mb-4">No se encontraron reservas con los filtros aplicados</p>
-                                        <a href="{{ route('staff.bookings.create') }}"
-                                           class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md inline-flex items-center text-sm font-medium transition-colors">
-                                            <i class="fas fa-plus w-4 h-4 mr-2"></i>
-                                            Crear Primera Reserva
-                                        </a>
-                                    </div>
-                                </td>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Cliente
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Película
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Función
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Tickets
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Total
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Fecha Reserva
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Estado
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Acciones
+                                </th>
                             </tr>
-                        @endforelse
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Paginación -->
-                @if($bookings->hasPages())
-                    <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
-                        {{ $bookings->links() }}
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                            @forelse($bookings as $booking)
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900">
+                                            {{ $booking->user->name }}
+                                        </div>
+                                        <div class="text-sm text-gray-500">
+                                            {{ $booking->user->email }}
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-10 w-10">
+                                                <img class="h-10 w-10 rounded-lg object-cover"
+                                                     src="{{ $booking->showtime->movie->poster_url }}"
+                                                     alt="{{ $booking->showtime->movie->title }}">
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900">
+                                                    {{ $booking->showtime->movie->title }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">
+                                            {{ $booking->showtime->start_time->format('d/m/Y H:i') }}
+                                        </div>
+                                        <div class="text-sm text-gray-500">
+                                            Sala {{ $booking->showtime->room->name }}
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            <span class="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-blue-600 rounded-full">
+                                                {{ $booking->number_of_tickets }}
+                                            </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-600">
+                                        ${{ number_format($booking->total_price, 2) }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {{ $booking->created_at->format('d/m/Y H:i') }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                                {{ $booking->status == 'confirmed' ? 'bg-green-100 text-green-800' :
+                                                   ($booking->status == 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800') }}">
+                                                {{ $booking->status == 'confirmed' ? 'Confirmada' :
+                                                   ($booking->status == 'pending' ? 'Pendiente' : 'Cancelada') }}
+                                            </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <div class="flex space-x-2">
+                                            <a href="{{ route('admin.bookings.show', $booking) }}"
+                                               class="text-blue-600 hover:text-blue-900"
+                                               title="Ver detalles">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                                </svg>
+                                            </a>
+                                            <a href="{{ route('admin.bookings.edit', $booking) }}"
+                                               class="text-yellow-600 hover:text-yellow-900"
+                                               title="Editar">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                </svg>
+                                            </a>
+                                            <form action="{{ route('admin.bookings.destroy', $booking) }}"
+                                                  method="POST" class="inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit"
+                                                        class="text-red-600 hover:text-red-900"
+                                                        title="Eliminar"
+                                                        onclick="return confirm('¿Estás seguro de eliminar esta reserva?')">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                    </svg>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="8" class="px-6 py-4 text-center text-sm text-gray-500">
+                                        <div class="flex flex-col items-center justify-center py-8">
+                                            <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                            </svg>
+                                            <p class="text-lg font-medium text-gray-900">No hay reservas registradas</p>
+                                            <p class="text-gray-500">No se han realizado reservas en el sistema.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforelse
+                            </tbody>
+                        </table>
                     </div>
-                @endif
+
+                    <!-- Pagination -->
+                    @if(method_exists($bookings, 'hasPages') && $bookings->hasPages())
+                        <div class="mt-6 flex items-center justify-between">
+                            <div class="text-sm text-gray-700">
+                                Mostrando
+                                <span class="font-medium">{{ $bookings->firstItem() }}</span>
+                                a
+                                <span class="font-medium">{{ $bookings->lastItem() }}</span>
+                                de
+                                <span class="font-medium">{{ $bookings->total() }}</span>
+                                resultados
+                            </div>
+                            <div class="flex space-x-2">
+                                {{ $bookings->links() }}
+                            </div>
+                        </div>
+                    @endif
+                </div>
             </div>
         </div>
     </div>

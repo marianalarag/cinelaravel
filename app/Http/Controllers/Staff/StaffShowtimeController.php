@@ -163,6 +163,9 @@ class StaffShowtimeController extends Controller
     /**
      * Display today's showtimes.
      */
+    /**
+     * Display today's showtimes.
+     */
     public function today()
     {
         $today = now()->format('Y-m-d');
@@ -171,7 +174,7 @@ class StaffShowtimeController extends Controller
             ->whereDate('start_time', $today)
             ->where('is_active', true)
             ->orderBy('start_time')
-            ->get();
+            ->paginate(15); // Cambia get() por paginate()
 
         return view('staff.showtimes.today', compact('showtimes'));
     }

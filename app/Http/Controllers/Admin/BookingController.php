@@ -10,7 +10,10 @@ class BookingController extends Controller
 {
     public function index()
     {
-        $bookings = Booking::with(['user', 'showtime.movie', 'showtime.room'])->latest()->get();
+        $bookings = Booking::with(['user', 'showtime.movie', 'showtime.room'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(10); // Asegúrate de usar paginate()
+
         return view('admin.bookings.index', compact('bookings'));
     }
 
