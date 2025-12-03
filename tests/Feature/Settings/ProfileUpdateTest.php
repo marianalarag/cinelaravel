@@ -4,19 +4,19 @@ use App\Livewire\Settings\Profile;
 use App\Models\User;
 use Livewire\Livewire;
 
-test('profile page is displayed', function () {
+test('la página de perfil se muestra', function () {
     $this->actingAs($user = User::factory()->create());
 
     $this->get('/settings/profile')->assertOk();
 });
 
-test('profile information can be updated', function () {
+test('la información del perfil puede actualizarse', function () {
     $user = User::factory()->create();
 
     $this->actingAs($user);
 
     $response = Livewire::test(Profile::class)
-        ->set('name', 'Test User')
+        ->set('name', 'Usuario de Prueba')
         ->set('email', 'test@example.com')
         ->call('updateProfileInformation');
 
@@ -24,18 +24,18 @@ test('profile information can be updated', function () {
 
     $user->refresh();
 
-    expect($user->name)->toEqual('Test User');
+    expect($user->name)->toEqual('Usuario de Prueba');
     expect($user->email)->toEqual('test@example.com');
     expect($user->email_verified_at)->toBeNull();
 });
 
-test('email verification status is unchanged when email address is unchanged', function () {
+test('el estado de verificación de correo no cambia cuando la dirección de correo permanece igual', function () {
     $user = User::factory()->create();
 
     $this->actingAs($user);
 
     $response = Livewire::test(Profile::class)
-        ->set('name', 'Test User')
+        ->set('name', 'Usuario de Prueba')
         ->set('email', $user->email)
         ->call('updateProfileInformation');
 
@@ -44,7 +44,7 @@ test('email verification status is unchanged when email address is unchanged', f
     expect($user->refresh()->email_verified_at)->not->toBeNull();
 });
 
-test('user can delete their account', function () {
+test('el usuario puede eliminar su cuenta', function () {
     $user = User::factory()->create();
 
     $this->actingAs($user);
@@ -61,13 +61,13 @@ test('user can delete their account', function () {
     expect(auth()->check())->toBeFalse();
 });
 
-test('correct password must be provided to delete account', function () {
+test('se debe proporcionar la contraseña correcta para eliminar la cuenta', function () {
     $user = User::factory()->create();
 
     $this->actingAs($user);
 
     $response = Livewire::test('settings.delete-user-form')
-        ->set('password', 'wrong-password')
+        ->set('password', 'contraseña-incorrecta')
         ->call('deleteUser');
 
     $response->assertHasErrors(['password']);
